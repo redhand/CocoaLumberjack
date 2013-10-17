@@ -398,8 +398,10 @@
 		if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
 		{
 			NSLogVerbose(@"DDLogFileManagerDefault: Creating new log file: %@", fileName);
-			
-			[[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:nil];
+
+      // TODO: patched based on initial option provided here: https://github.com/robbiehanson/CocoaLumberjack/issues/129
+      // TODO: need to re-review once the developer comments.
+			[[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:@{NSFileProtectionKey: NSFileProtectionNone}];
 			
 			// Since we just created a new log file, we may need to delete some old log files
 			[self deleteOldLogFiles];
