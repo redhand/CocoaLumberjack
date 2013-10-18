@@ -865,10 +865,14 @@
 		}
 		
 		NSData *logData = [logMsg dataUsingEncoding:NSUTF8StringEncoding];
-		
-		[[self currentLogFileHandle] writeData:logData];
-		
-		[self maybeRollLogFileDueToSize];
+
+    @try {
+      [[self currentLogFileHandle] writeData:logData];
+      [self maybeRollLogFileDueToSize];
+    }
+    @catch (NSException *exception) {
+      NSLog(@"Could not write log data: %@", exception);
+    }
 	}
 }
 
