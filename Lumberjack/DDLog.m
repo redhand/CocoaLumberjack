@@ -773,7 +773,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 
 @implementation DDLoggerNode
 
-- (id)initWithLogger:(id <DDLogger>)aLogger loggerQueue:(dispatch_queue_t)aLoggerQueue
+- (instancetype)initWithLogger:(id <DDLogger>)aLogger loggerQueue:(dispatch_queue_t)aLoggerQueue
 {
 	if ((self = [super init]))
 	{
@@ -822,15 +822,15 @@ static char *dd_str_copy(const char *str)
 	return result;
 }
 
-- (id)initWithLogMsg:(NSString *)msg
-               level:(int)level
-                flag:(int)flag
-             context:(int)context
-                file:(const char *)aFile
-            function:(const char *)aFunction
-                line:(int)line
-                 tag:(id)aTag
-             options:(DDLogMessageOptions)optionsMask
+- (instancetype)initWithLogMsg:(NSString *)msg
+                         level:(int)level
+                          flag:(int)flag
+                       context:(int)context
+                          file:(const char *)aFile
+                      function:(const char *)aFunction
+                          line:(int)line
+                           tag:(id)aTag
+                       options:(DDLogMessageOptions)optionsMask
 {
 	if ((self = [super init]))
 	{
@@ -855,7 +855,14 @@ static char *dd_str_copy(const char *str)
 		timestamp = [[NSDate alloc] init];
 		
 		machThreadID = pthread_mach_thread_np(pthread_self());
-		
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000
+        // dispatch_get_current_queue() is deprecated and most importantly it
+        // crashes sometimes and there's no other way to reliably get the name
+        // of the current queue.
+
+        queueLabel = dd_str_copy("");
+#else
 		#pragma clang diagnostic push
 		#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 		// The documentation for dispatch_get_current_queue() states:
@@ -874,6 +881,7 @@ static char *dd_str_copy(const char *str)
 		#pragma clang diagnostic pop
 		
 		queueLabel = dd_str_copy(dispatch_queue_get_label(currentQueue));
+#endif
 		
 		threadName = [[NSThread currentThread] name];
 	}
